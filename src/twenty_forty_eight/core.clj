@@ -44,8 +44,8 @@
   (if msg (println msg))
   board)
 
-(defn randomize [n board]
-  (let [coord (->> (permute-coords-vec n)
+(defn randomize [board]
+  (let [coord (->> (permute-coords-vec (:n (meta board)))
                    (filter (fn randomize- [x] (zero? (get-in board x))))
                    rand-nth)]
     (assoc-in board coord (cell-init))))
@@ -54,15 +54,8 @@
   ([] (init-board 4))
   ([n]
      (->> (new-board n)
-          (randomize n)
-          (randomize n))))
-
-(defn slam-row [row]
-  (->> row
-       (remove zero?)
-       (partition-by identity)
-       (mapcat #(partition-all 2 %))
-       (map #(apply + %))))
+          (randomize)
+          (randomize))))
 
 (defn flip-ya-cw [board]
   (apply mapv vector (reverse board)))
@@ -72,18 +65,37 @@
 (defn flip-ya [n board]
   (nth (iterate flip-ya-cw board) n))
 
-(defn detect-loss [board])
+(defn detect-loss
+  ([old-board new-board]
+     (if (not= old-board new-board)
+       new-board
+       (throw (Throwable. "noop")))))
+
+(defn slam-row [row]
+  (->> row
+       (remove zero?)
+       (partition-by identity)
+       (mapcat #(partition-all 2 %))
+       (map #(apply + %))))
+
+(defn slam [nrots board]
+  (let [n (:n (meta board))]
+    (with-meta
+      (->> board
+           (flip-ya nrots)
+           (map #(slam-row %))
+           (map #(pad-row-r n %))
+           (flip-ya (- 4 nrots)))
+      {:n n})))
 
 (defn move [board dir]
   (let [n (:n (meta board))
-        nflips (dir flipcounts)]
+        nrots (dir flipcounts)]
     (with-meta
       (->> board
-           (flip-ya nflips)
-           (map #(slam-row %))
-           (map #(pad-row-r n %))
-           (flip-ya (- 4 nflips))
-           (randomize n)
+           (slam nrots)
+           (detect-loss board)
+           (randomize)
            (print-board))
       {:n n})))
 
