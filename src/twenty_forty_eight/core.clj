@@ -43,16 +43,20 @@
         (take n (repeat 0))))))
 
 (defn print-board [board & {:keys [msg]}]
+  (println)
   (doseq [row board]
     (println (apply str (map #(format "% 5d" %) row))))
   (if msg (println msg))
+  (println (meta board))
   board)
 
 (defn randomize [board]
-  (let [coord (->> (permute-coords-vec (:n (meta board)))
-                   (filter (fn randomize- [x] (zero? (get-in board x))))
-                   rand-nth)]
-    (assoc-in board coord (cell-init))))
+  (if (full? board)
+    board
+    (let [coord (->> (permute-coords-vec (:n (meta board)))
+                     (filter (fn randomize- [x] (zero? (get-in board x))))
+                     rand-nth)]
+      (assoc-in board coord (cell-init)))))
 
 (defn init-board
   ([] (init-board 4))
