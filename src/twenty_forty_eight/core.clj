@@ -1,6 +1,7 @@
 (ns twenty-forty-eight.core
   (:require [clojure.pprint :refer [pprint]]
-            [clojure.repl :as repl]))
+            [clojure.repl :as repl]
+            [clojure.math.numeric-tower :as math]))
 
 (defn new-board-vector [n]
   (vec (repeat (* n n) 0)))
