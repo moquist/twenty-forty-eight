@@ -101,23 +101,66 @@
        (map #(apply + %))))
 
 (defn slam [nrots board]
-  (let [n (:n (meta board))]
+  (let [m (meta board)]
     (with-meta
       (->> board
            (flip-ya nrots)
            (map #(slam-row %))
-           (map #(pad-row-r n %))
+           (map #(pad-row-r (:n m) %))
            (flip-ya (- 4 nrots)))
-      {:n n})))
+      m)))
+
+(defn points [old-freq new-freq]
+  (reduce (fn points- [r x]
+            (print :x x :r r)
+            (if (not= (old-freq x) (new-freq x))
+              (+ r
+                 (* x
+                    (math/abs (- (or (new-freq x) 0)
+                                 (or (old-freq x) 0)))))
+              r))
+          0 (rest (filter
+                   #(and (not (zero? %))
+                         (not= (old-freq %) (new-freq %)))
+                   (sort (distinct
+                          (apply concat
+                                 (map keys [old-freq new-freq]))))))))
+
+(comment
+(move (this-board [[8  0 4 8]
+                                            [0  0 0 2]
+                                            [8  0 4 2]
+                                            [8 16 0 2]])
+                               :d)
+  )
+
+(defn score
+  "Cannot distinguish between new slammed numbers and new random
+   numbers, so must be called before randomize."
+  [old-board new-board]
+  (let [score (or (:score (meta new-board)) 0)
+        f1 (frequencies (apply concat old-board))
+        f2 (frequencies (apply concat new-board))
+        points (points f1 f2)
+        _ (print-board old-board)
+        _ (print-board new-board)
+        _ (println :f1 (map #(vector % (f1 %)) (sort (keys f1))))
+        _ (println :f2 (map #(vector % (f2 %)) (sort (keys f2))))
+        _ (println :points points)]
+    (vary-meta new-board assoc :score (+ score points))))
 
 (defn move [board dir]
-  (let [n (:n (meta board))
-        nrots (dir flipcounts)]
-    (with-meta
-      (->> board
-           (slam nrots)
-           (detect-loss board)
-           (randomize)
-           (print-board))
-      {:n n})))
+  (if (:loss? (meta board))
+    (print-board board)
+    (let [n (:n (meta board))
+          nrots (dir flipcounts)
+          new-board (slam nrots board)
+          new-board (score board new-board)
+          new-board (detect-loss board new-board)
+          ]
+      (if (:loss? (meta new-board)) 
+        (print-board new-board)
+        (->> new-board
+             (randomize)
+             (print-board))))))
 
