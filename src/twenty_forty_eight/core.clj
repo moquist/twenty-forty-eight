@@ -1,29 +1,24 @@
-(ns twenty-forty-eight.core
+(ns ^{:todo "Refactor for beauty"}
+  twenty-forty-eight.core
   (:require [clojure.pprint :refer [pprint]]
             [clojure.repl :as repl]
             [clojure.math.numeric-tower :as math]))
 
-(defn new-board-vector [n]
-  (vec (repeat (* n n) 0)))
-
-(defn permute-coords-vec [n]
-  (for [x (range n)
-        y (range n)]
-    [x y]))
-
-(defn cell-init []
-  (if (> 0.9 (rand)) 2 4))
-
-(defn new-board-map1 [n]
-  (apply conj {}
-         (for [x (range n)
-               y (range n)]
-           [[x y] 0])))
-
-(defn new-board-map2 [n]
-  (zipmap 
-   (permute-coords-vec n) 
-   (repeat 0)))
+;; -----------------------------------
+;; fns to make different kinds of new boards
+;;(defn new-board-vector [n]
+;;  (vec (repeat (* n n) 0)))
+;;
+;;(defn new-board-map1 [n]
+;;  (apply conj {}
+;;         (for [x (range n)
+;;               y (range n)]
+;;           [[x y] 0])))
+;;
+;;(defn new-board-map2 [n]
+;;  (zipmap 
+;;   (permute-coords-vec n) 
+;;   (repeat 0)))
 
 
 ;; -----------------------------------
@@ -33,24 +28,48 @@
     (vec (repeat n (vec (repeat n 0))))
     {:n n}))
 
-(defn this-board [board]
+(defn this-board
+  "Take a specified board and add the :n meta.
+   This is pretty useless and should probably be ditched soon."
+  [board]
   (with-meta board {:n (count board)}))
 
-(defn pad-row-r [n row]
-  (first
-   (vector
-    (or (first (partition n n (repeat 0) row))
-        (take n (repeat 0))))))
+(defn permute-coords-vec
+  "Get a permutation seq of all the coordinates for a square board of
+   size n."
+  [n]
+  (for [x (range n)
+        y (range n)]
+    [x y]))
 
-(defn print-board [board & {:keys [msg]}]
+(defn cell-init
+  "Return a 2 90% of the time (exclusive), and a 4 the other 10%."
+  []
+  (if (> 0.9 (rand)) 2 4))
+
+(defn pad-row-r
+  "Pad the given row to the right with zeros up to length n.
+   Returns the padded row."
+  [n row]
+  (first (vector (take n (concat row (repeat 0))))))
+
+(defn print-board
+  "Print the board, the meta for the board (including score and size),
+   and an optional :msg.
+   Returns board."
+  [board & {:keys [msg]}]
   (println)
   (doseq [row board]
     (println (apply str (map #(format "% 5d" %) row))))
-  (if msg (println msg))
   (println (meta board))
+  (if msg (println msg))
   board)
 
-(defn randomize [board]
+(defn randomize
+  "If the board is not full, randomly choose a cell with a 0 and
+  initialize that cell.
+  Returns board."
+  [board]
   (if (full? board)
     board
     (let [coord (->> (permute-coords-vec (:n (meta board)))
@@ -59,49 +78,46 @@
       (assoc-in board coord (cell-init)))))
 
 (defn init-board
+  "Create a new board of size n (default 4), with two randomized cells."
   ([] (init-board 4))
   ([n]
      (->> (new-board n)
           (randomize)
           (randomize))))
 
-(defn flip-ya-cw [board]
+(defn flip-ya-cw
+  "Rotate the board clockwise by 90 degrees."
+  [board]
   (apply mapv vector (reverse board)))
 
+;; How many 90 degree clockwise rotations must we do to align the
+;; board as if every move were a left-hand move?
 (def flipcounts {:l 0 :d 1 :r 2 :u 3})
 
-(defn flip-ya [n board]
+(defn flip-ya
+  "Rotate the board 90 degrees clockwise, n times."
+  [n board]
   (nth (iterate flip-ya-cw board) n))
 
-(defn full? [board]
+(defn full?
+  "If board has any zeros, returns true. Else false."
+  [board]
   (not (some zero? (apply concat board))))
 
-(defn slammable? [board]
-  (some (fn slammable?- [dir]
-          (not= board (slam (dir flipcounts) board)))
-        [:l :d :r :u]))
-
-(defn detect-loss
-  ([old-board new-board]
-     (println :detect-loss
-              (not= old-board new-board)
-              (not (full? new-board))
-              (slammable? new-board))
-     (if (or (not= old-board new-board)
-             (not (full? new-board))
-             (slammable? new-board))
-       new-board
-       (vary-meta new-board assoc :loss? true))))
-
-(defn slam-row [row]
+(defn slam-row
+  "Move the given row to the left."
+  [row]
   (->> row
        (remove zero?)
        (partition-by identity)
        (mapcat #(partition-all 2 %))
        (map #(apply + %))))
 
-(defn slam [nrots board]
-  (let [m (meta board)]
+(defn slam
+  "Move the given board in the specified direction (given by"
+  [dir board]
+  (let [m (meta board)
+        nrots (flipcounts dir)]
     (with-meta
       (->> board
            (flip-ya nrots)
@@ -110,7 +126,32 @@
            (flip-ya (- 4 nrots)))
       m)))
 
-(defn points [old-freq new-freq]
+(defn slammable?
+  "If movement in any direction changes the board, returns true. Else false."
+  [board]
+  (some (fn slammable?- [dir]
+          (not= board (slam dir board)))
+        [:l :d :r :u]))
+
+(defn detect-loss
+  "If no move just happened, the board is full, and no movement is
+   possible, return new-board with :loss? true in meta. Otherwise
+   return new-board."
+  [old-board new-board]
+  #_
+  (println :detect-loss-nope
+           (not= old-board new-board)
+           (not (full? new-board))
+           (slammable? new-board))
+  (if (or (not= old-board new-board)
+          (not (full? new-board))
+          (slammable? new-board))
+    new-board
+    (vary-meta new-board assoc :loss? true)))
+
+(defn points
+  "TODO: refactor heavily (just got it working :))"
+  [old-freq new-freq]
   (reduce (fn points- [r x]
             (print :x x :r r)
             (if (not= (old-freq x) (new-freq x))
@@ -119,12 +160,13 @@
                     (math/abs (- (or (new-freq x) 0)
                                  (or (old-freq x) 0)))))
               r))
-          0 (rest (filter
-                   #(and (not (zero? %))
-                         (not= (old-freq %) (new-freq %)))
-                   (sort (distinct
-                          (apply concat
-                                 (map keys [old-freq new-freq]))))))))
+          0
+          (rest (filter
+                 #(and (not (zero? %))
+                       (not= (old-freq %) (new-freq %)))
+                 (sort (distinct
+                        (apply concat
+                               (map keys [old-freq new-freq]))))))))
 
 (comment
 (move (this-board [[8  0 4 8]
@@ -135,32 +177,43 @@
   )
 
 (defn score
-  "Cannot distinguish between new slammed numbers and new random
+  "Return new-board with the :score meta updated for any changes.
+
+   Cannot distinguish between new slammed numbers and new random
    numbers, so must be called before randomize."
   [old-board new-board]
   (let [score (or (:score (meta new-board)) 0)
         f1 (frequencies (apply concat old-board))
         f2 (frequencies (apply concat new-board))
         points (points f1 f2)
-        _ (print-board old-board)
-        _ (print-board new-board)
-        _ (println :f1 (map #(vector % (f1 %)) (sort (keys f1))))
-        _ (println :f2 (map #(vector % (f2 %)) (sort (keys f2))))
-        _ (println :points points)]
+        ;;_ (print-board old-board)
+        ;;_ (print-board new-board)
+        ;;_ (println :f1 (map #(vector % (f1 %)) (sort (keys f1))))
+        ;;_ (println :f2 (map #(vector % (f2 %)) (sort (keys f2))))
+        ;;_ (println :points points)
+        ]
     (vary-meta new-board assoc :score (+ score points))))
 
-(defn move [board dir]
+(defn move
+  "Move the given board in the specified direction."
+  [board dir]
   (if (:loss? (meta board))
     (print-board board)
     (let [n (:n (meta board))
-          nrots (dir flipcounts)
-          new-board (slam nrots board)
+          new-board (slam dir board)
           new-board (score board new-board)
-          new-board (detect-loss board new-board)
-          ]
+          new-board (detect-loss board new-board)]
       (if (:loss? (meta new-board)) 
         (print-board new-board)
         (->> new-board
              (randomize)
              (print-board))))))
 
+(comment
+  "How to play:"
+  (def b (atom (init-board)))
+  (swap! b move :u)
+  (swap! b move :d)
+  (swap! b move :l)
+  (swap! b move :r)
+  )
