@@ -65,6 +65,11 @@
   (if msg (println msg))
   board)
 
+(defn full?
+  "If board has any zeros, returns true. Else false."
+  [board]
+  (not (some zero? (apply concat board))))
+
 (defn randomize
   "If the board is not full, randomly choose a cell with a 0 and
   initialize that cell.
@@ -98,11 +103,6 @@
   "Rotate the board 90 degrees clockwise, n times."
   [n board]
   (nth (iterate flip-ya-cw board) n))
-
-(defn full?
-  "If board has any zeros, returns true. Else false."
-  [board]
-  (not (some zero? (apply concat board))))
 
 (defn slam-row
   "Move the given row to the left."
