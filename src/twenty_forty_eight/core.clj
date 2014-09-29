@@ -33,6 +33,9 @@
     (vec (repeat n (vec (repeat n 0))))
     {:n n}))
 
+(defn this-board [board]
+  (with-meta board {:n (count board)}))
+
 (defn pad-row-r [n row]
   (first
    (vector
