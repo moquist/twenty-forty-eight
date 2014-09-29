@@ -5,6 +5,7 @@ A Clojure implementation of the game 2048, currently playable only in the REPL.
 ## Usage
 
 ```clojure
+(in-ns 'twenty-forty-eight.core)
 (def b (atom (init-board)))
 (swap! b move :u)
 (swap! b move :d)
