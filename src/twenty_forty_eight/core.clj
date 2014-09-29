@@ -73,11 +73,25 @@
 (defn flip-ya [n board]
   (nth (iterate flip-ya-cw board) n))
 
+(defn full? [board]
+  (not (some zero? (apply concat board))))
+
+(defn slammable? [board]
+  (some (fn slammable?- [dir]
+          (not= board (slam (dir flipcounts) board)))
+        [:l :d :r :u]))
+
 (defn detect-loss
   ([old-board new-board]
-     (if (not= old-board new-board)
+     (println :detect-loss
+              (not= old-board new-board)
+              (not (full? new-board))
+              (slammable? new-board))
+     (if (or (not= old-board new-board)
+             (not (full? new-board))
+             (slammable? new-board))
        new-board
-       (throw (Throwable. "noop")))))
+       (vary-meta new-board assoc :loss? true))))
 
 (defn slam-row [row]
   (->> row
