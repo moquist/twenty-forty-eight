@@ -168,31 +168,18 @@
                         (apply concat
                                (map keys [old-freq new-freq]))))))))
 
-(comment
-(move (this-board [[8  0 4 8]
-                                            [0  0 0 2]
-                                            [8  0 4 2]
-                                            [8 16 0 2]])
-                               :d)
-  )
-
 (defn score
   "Return new-board with the :score meta updated for any changes.
 
    Cannot distinguish between new slammed numbers and new random
    numbers, so must be called before randomize."
   [old-board new-board]
-  (let [score (or (:score (meta new-board)) 0)
+  (let [old-points (or (-> (meta new-board) :score :points) 0)
         f1 (frequencies (apply concat old-board))
         f2 (frequencies (apply concat new-board))
-        points (points f1 f2)
-        ;;_ (print-board old-board)
-        ;;_ (print-board new-board)
-        ;;_ (println :f1 (map #(vector % (f1 %)) (sort (keys f1))))
-        ;;_ (println :f2 (map #(vector % (f2 %)) (sort (keys f2))))
-        ;;_ (println :points points)
-        ]
-    (vary-meta new-board assoc :score (+ score points))))
+        new-points (points f1 f2)
+        bign (apply max (apply concat new-board))]
+    (vary-meta new-board assoc :score {:max bign :points (+ old-points new-points)})))
 
 (defn move
   "Move the given board in the specified direction."
