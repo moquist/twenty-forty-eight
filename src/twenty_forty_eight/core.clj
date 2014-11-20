@@ -101,7 +101,7 @@
 
 (defn flip-ya
   "Rotate the board 90 degrees clockwise, n times."
-  [n board]
+  [board n]
   (nth (iterate flip-ya-cw board) n))
 
 (defn slam-row
@@ -119,11 +119,11 @@
   (let [m (meta board)
         nrots (flipcounts dir)]
     (with-meta
-      (->> board
-           (flip-ya nrots)
-           (map #(slam-row %))
-           (map #(pad-row-r (:n m) %))
-           (flip-ya (- 4 nrots)))
+      (-> board
+          (flip-ya nrots)
+          (->> (map #(slam-row %))
+               (map #(pad-row-r (:n m) %)))
+          (flip-ya (- 4 nrots)))
       m)))
 
 (defn slammable?
