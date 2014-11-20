@@ -196,6 +196,34 @@
              (randomize)
              (print-board))))))
 
+(defn play-this-seq
+  "Play a given seq of moves until we run out of moves, or the game is lost."
+  ([moves] (play-this-seq moves (init-board)))
+  ([moves board]
+     (if (or (empty? moves) (:loss? (meta board)))
+       board
+       (recur (rest moves) (move board (first moves))))))
+
+(defn a-not-i
+  "This is a null model for validating any AIs."
+  [_]
+  (rand-nth [:l :r :u :d]))
+
+(defn a-lookahead-1 [board]
+  (for [d [:l :r :u :d]]
+    (-> (move board d)
+        :score
+        :max)))
+
+(defn play-ai
+  "Play any AI that is provided as a fn taking a board and returning a single move."
+  ([ai-fn] (play-ai ai-fn (init-board)))
+  ([ai-fn board]
+     (print-board board)
+     (if (:loss? (meta board))
+       board
+       (recur ai-fn (move board (ai-fn board))))))
+
 (comment
   "How to play:"
   (def b (atom (init-board)))
