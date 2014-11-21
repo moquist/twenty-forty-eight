@@ -195,7 +195,7 @@
   ([ai-fn] (play-ai (init-board) ai-fn))
   ([board ai-fn]
      (if-let [d (ai-fn board)]
-       (recur (move board d) ai-fn)
+       (recur (moves board (if (coll? d) d [d])) ai-fn)
        board)))
 
 (comment
