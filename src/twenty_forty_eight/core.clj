@@ -114,8 +114,8 @@
        (map #(apply + %))))
 
 (defn slam
-  "Move the given board in the specified direction (given by"
   [dir board]
+  "Move the given board in the specified direction."
   (let [m (meta board)
         nrots (flipcounts dir)]
     (with-meta
