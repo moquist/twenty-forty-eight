@@ -169,11 +169,11 @@
 
 (defn play-this-seq
   "Play a given seq of moves until we run out of moves, or the game is lost."
-  ([moves] (play-this-seq moves (init-board)))
-  ([moves board]
+  ([moves] (play-this-seq (init-board) moves))
+  ([board moves]
      (if (or (empty? moves) (:loss? (meta board)))
        board
-       (recur (rest moves) (move board (first moves))))))
+       (recur (move board (first moves)) (rest moves)))))
 
 (defn a-not-i
   "This is a null model for validating any AIs."
