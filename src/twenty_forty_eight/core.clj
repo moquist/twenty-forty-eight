@@ -160,8 +160,8 @@
   (if (:loss? (meta board))
     (print-board board)
     (let [n (:n (meta board))
-          new-board (score board new-board)
           new-board (slam board dir)
+          new-board (score new-board)
           new-board (detect-loss board new-board)]
       (if (:loss? (meta new-board)) 
         (print-board new-board)
