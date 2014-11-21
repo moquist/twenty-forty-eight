@@ -130,8 +130,8 @@
   "If movement in any direction changes the board, returns true. Else false."
   [board]
   (some (fn slammable?- [dir]
-        [:l :d :r :u]))
           (not= board (slam board dir)))
+        [:l :d]))
 
 (defn detect-loss
   "If no move just happened, the board is full, and no movement is
