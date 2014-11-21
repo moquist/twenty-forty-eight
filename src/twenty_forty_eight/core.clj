@@ -124,7 +124,7 @@
           (->> (map #(slam-row %))
                (map #(pad-row-r (:n m) %)))
           (flip-ya (- 4 nrots)))
-      m)))
+      (assoc m :moves (conj (or (:moves m) []) dir)))))
 
 (defn slammable?
   "If movement in any direction changes the board, returns true. Else false."
