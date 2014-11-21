@@ -167,9 +167,10 @@
         new-board
         (print-board (randomize new-board))))))
 
-(defn play-this-seq
-  "Play a given seq of moves until we run out of moves, or the game is lost."
-  ([moves] (play-this-seq (init-board) moves))
+(defn moves
+  "Move according to a given seq of moves until we run out of moves,
+  or the game is lost."
+  ([moves] (moves (init-board) moves))
   ([board moves]
      (if (or (empty? moves) (:loss? (meta board)))
        board
@@ -180,20 +181,22 @@
   [_]
   (rand-nth [:l :r :u :d]))
 
-(defn a-lookahead-1 [board]
-  (for [d [:l :r :u :d]]
-    (-> (move board d)
-        :score
-        :max)))
+(defn ai-pref-dir
+  "If you can move in a prioritized direction, do so."
+  ([board] (ai-pref-dir board [:l :d :r :u]))
+  ([board priorities]
+     (some (fn ai-pref-dir- [dir]
+             (when (not= board (slam board dir)) dir))
+           priorities)))
 
 (defn play-ai
-  "Play any AI that is provided as a fn taking a board and returning a single move."
-  ([ai-fn] (play-ai ai-fn (init-board)))
-  ([ai-fn board]
-     (print-board board)
-     (if (:loss? (meta board))
-       board
-       (recur ai-fn (move board (ai-fn board))))))
+  "Play any AI that is provided as a fn taking a board and returning a
+  single move."
+  ([ai-fn] (play-ai (init-board) ai-fn))
+  ([board ai-fn]
+     (if-let [d (ai-fn board)]
+       (recur (move board d) ai-fn)
+       board)))
 
 (comment
   "How to play:"
