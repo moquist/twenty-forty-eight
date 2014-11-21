@@ -158,16 +158,14 @@
   "Move the given board in the specified direction."
   [board dir]
   (if (:loss? (meta board))
-    (print-board board)
+    board
     (let [n (:n (meta board))
           new-board (slam board dir)
           new-board (score new-board)
           new-board (detect-loss board new-board)]
       (if (:loss? (meta new-board)) 
-        (print-board new-board)
-        (->> new-board
-             (randomize)
-             (print-board))))))
+        new-board
+        (print-board (randomize new-board))))))
 
 (defn play-this-seq
   "Play a given seq of moves until we run out of moves, or the game is lost."
