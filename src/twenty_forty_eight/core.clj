@@ -149,37 +149,10 @@
     new-board
     (vary-meta new-board assoc :loss? true)))
 
-(defn points
-  "TODO: refactor heavily (just got it working :))"
-  [old-freq new-freq]
-  (reduce (fn points- [r x]
-            (print :x x :r r)
-            (if (not= (old-freq x) (new-freq x))
-              (+ r
-                 (* x
-                    (math/abs (- (or (new-freq x) 0)
-                                 (or (old-freq x) 0)))))
-              r))
-          0
-          (rest (filter
-                 #(and (not (zero? %))
-                       (not= (old-freq %) (new-freq %)))
-                 (sort (distinct
-                        (apply concat
-                               (map keys [old-freq new-freq]))))))))
-
 (defn score
-  "Return new-board with the :score meta updated for any changes.
-
-   Cannot distinguish between new slammed numbers and new random
-   numbers, so must be called before randomize."
-  [old-board new-board]
-  (let [old-points (or (-> (meta new-board) :score :points) 0)
-        f1 (frequencies (apply concat old-board))
-        f2 (frequencies (apply concat new-board))
-        new-points (points f1 f2)
-        bign (apply max (apply concat new-board))]
-    (vary-meta new-board assoc :score {:max bign :points (+ old-points new-points)})))
+  "Return board with the :score meta updated for any changes."
+  [board]
+  (vary-meta board assoc :score {:max-cell (apply max (apply concat board))}))
 
 (defn move
   "Move the given board in the specified direction."
