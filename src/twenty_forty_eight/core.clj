@@ -114,8 +114,8 @@
        (map #(apply + %))))
 
 (defn slam
-  [dir board]
   "Move the given board in the specified direction."
+  [board dir]
   (let [m (meta board)
         nrots (flipcounts dir)]
     (with-meta
@@ -130,8 +130,8 @@
   "If movement in any direction changes the board, returns true. Else false."
   [board]
   (some (fn slammable?- [dir]
-          (not= board (slam dir board)))
         [:l :d :r :u]))
+          (not= board (slam board dir)))
 
 (defn detect-loss
   "If no move just happened, the board is full, and no movement is
@@ -187,8 +187,8 @@
   (if (:loss? (meta board))
     (print-board board)
     (let [n (:n (meta board))
-          new-board (slam dir board)
           new-board (score board new-board)
+          new-board (slam board dir)
           new-board (detect-loss board new-board)]
       (if (:loss? (meta new-board)) 
         (print-board new-board)
