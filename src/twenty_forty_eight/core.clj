@@ -2,7 +2,8 @@
   twenty-forty-eight.core
   (:require [clojure.pprint :refer [pprint]]
             [clojure.repl :as repl]
-            [clojure.math.numeric-tower :as math]))
+            [clojure.math.numeric-tower :as math]
+            [incanter.stats :as stats]))
 
 ;; -----------------------------------
 ;; fns to make different kinds of new boards
@@ -206,6 +207,12 @@
        (recur (moves board (if (coll? d) d [d])) ai-fn)
        board)))
 
+(defn stats-5-summary [data]
+  {:min (apply min data)
+   :max (apply max data)
+   :median (stats/median data)
+   :mean (stats/mean data)
+   :sd (stats/sd data)})
 (comment
   "How to play:"
   (def b (atom (init-board)))
