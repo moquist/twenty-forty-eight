@@ -216,6 +216,25 @@
    :median (stats/median data)
    :mean (stats/mean data)
    :sd (stats/sd data)})
+
+(defn max-cell [board]
+  (-> board meta :score :max-cell))
+
+(defn play-ai-stats
+  "Play the provided player n times and show stats (min, max, median, mean, sd) of max-cell scores."
+  ([ai-fn] (play-ai-stats ai-fn 1000))
+  ([ai-fn n] (play-ai-stats
+              ai-fn
+              (dec n)
+              (conj [] (max-cell (play-ai ai-fn)))))
+  ([ai-fn n scores]
+     (if (> n 0)
+       (recur
+        ai-fn
+        (dec n)
+        (conj scores (max-cell (play-ai ai-fn))))
+       (stats-5-summary scores))))
+
 (comment
   "How to play:"
   (def b (atom (init-board)))
