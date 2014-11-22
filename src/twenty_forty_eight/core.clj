@@ -179,8 +179,10 @@
 
 (defn a-not-i
   "This is a null model for validating any AIs."
-  [_]
-  (rand-nth [:l :r :u :d]))
+  [board]
+  (some (fn a-not-i- [dir]
+          (when (not= board (slam board dir)) dir))
+        (shuffle [:l :r :u :d])))
 
 (defn ai-pref-dir
   "If you can move in a prioritized direction, do so."
