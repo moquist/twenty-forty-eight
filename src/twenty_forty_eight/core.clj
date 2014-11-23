@@ -233,7 +233,8 @@
   (-> board meta :score :max-cell))
 
 (defn play-ai-stats
-  "Play the provided player n times and show stats (min, max, median, mean, sd) of max-cell scores."
+  "Play the provided player n times and show stats (min, max, median,
+  mean, sd) of max-cell scores."
   ([ai-fn] (play-ai-stats ai-fn 1000))
   ([ai-fn n] (play-ai-stats
               ai-fn
