@@ -192,6 +192,26 @@
              (when (not= board (slam board dir)) dir))
            priorities)))
 
+(defn count-blanks [board]
+  (or (get
+       (frequencies (apply concat board))
+       0)
+      0))
+
+(defn ai-pref-dir-watch-blanks
+  "If you can move in a prioritized direction, do so, unless a threshold # of blanks has been crossed.
+  If the threshold of blanks has been crossed, skip the first two
+  prioritized directions and take the 3rd."
+  ([board] (ai-pref-dir-watch-blanks board [:l :l :d :d :u [:u :l :d] :r [:r :l :d]]))
+  ;; also try: [:l :l :d :d :u [:u :l :d] :r :r]
+  ([board priorities] (ai-pref-dir-watch-blanks board priorities 2))
+  ([board priorities threshold]
+     (let [priorities (partition 2 priorities)]
+       (some (fn ai-pref-dir-watch-blanks- [[dir nexts]]
+               (when (not= board (slam board dir)) nexts))
+             (if (<= (count-blanks board) threshold)
+               (drop 2 priorities) ; fix this if priorities become pairs!
+               priorities)))))
 
 (defn play-ai
   "Play any AI that is provided as a fn taking a board and returning a
