@@ -192,14 +192,6 @@
              (when (not= board (slam board dir)) dir))
            priorities)))
 
-(defn ai-pref-dir-2
-  "If you can move in a prioritized direction, do so.
-   Treat :u as a special case to be followed immediately by :d."
-  ([board] (ai-pref-dir-2 board [:l :l :d :d :r :r :u [:u :d]]))
-  ([board priorities]
-     (some (fn ai-pref-dir- [[dir nexts]]
-             (when (not= board (slam board dir)) nexts))
-           (partition 2 priorities))))
 
 (defn play-ai
   "Play any AI that is provided as a fn taking a board and returning a
