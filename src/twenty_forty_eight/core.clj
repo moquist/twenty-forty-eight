@@ -186,7 +186,7 @@
 
 (defn ai-pref-dir
   "If you can move in a prioritized direction, do so."
-  ([board] (ai-pref-dir board [:l :d :r :u]))
+  ([board] (ai-pref-dir board [:l :d :u :r]))
   ([board priorities]
      (some (fn ai-pref-dir- [dir]
              (when (not= board (slam board dir)) dir))
