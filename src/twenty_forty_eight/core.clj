@@ -222,6 +222,11 @@
        (recur (moves board (if (coll? d) d [d])) ai-fn)
        board)))
 
+(defn play-ai-dir-freqs
+  "Play any provided AI and print some simple stats about movement direction frequencies."
+  [& args]
+  (sort (fn [[k v] [k2 v2]] (< v v2)) (-> (apply play-ai args) meta :moves frequencies)))
+
 (defn stats-5-summary [data]
   {:min (apply min data)
    :max (apply max data)
