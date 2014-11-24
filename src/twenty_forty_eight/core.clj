@@ -226,12 +226,13 @@
   [& args]
   (sort (fn [[k v] [k2 v2]] (< v v2)) (-> (apply play-ai args) meta :moves frequencies)))
 
-(defn stats-5-summary [data]
+(defn stats-summary [data]
   {:min (apply min data)
    :max (apply max data)
    :median (stats/median data)
    :mean (stats/mean data)
-   :sd (stats/sd data)})
+   :sd (stats/sd data)
+   :freq (sort-by first (frequencies data))})
 
 (defn max-cell [board]
   (-> board meta :score :max-cell))
