@@ -237,21 +237,22 @@
 (defn max-cell [board]
   (-> board meta :score :max-cell))
 
-(defn play-ai-stats
+(defn play-ai->stats
   "Play the provided player n times and show stats (min, max, median,
   mean, sd) of max-cell scores."
-  ([ai-fn] (play-ai-stats ai-fn 1000))
-  ([ai-fn n] (play-ai-stats
+  ([ai-fn] (play-ai->stats ai-fn 1000))
+  ([ai-fn n] (play-ai->stats
               ai-fn
               (dec n)
-              (conj [] (max-cell (play-ai ai-fn)))))
-  ([ai-fn n scores]
+              (conj [] (future (play-ai ai-fn)))))
+  ([ai-fn n losing-boards]
      (if (> n 0)
        (recur
         ai-fn
         (dec n)
-        (conj scores (max-cell (play-ai ai-fn))))
-       (stats-5-summary scores))))
+        (conj losing-boards (future (play-ai ai-fn))))
+       (stats-summary (map #(-> % deref max-cell)
+                           losing-boards)))))
 
 (comment
   "How to play:"
