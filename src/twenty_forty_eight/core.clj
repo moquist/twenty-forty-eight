@@ -202,7 +202,7 @@
   "If you can move in a prioritized direction, do so, unless a threshold # of blanks has been crossed.
   If the threshold of blanks has been crossed, skip the first two
   prioritized directions and take the 3rd."
-  ([board] (ai-pref-dir-watch-blanks board 0))
+  ([board] (ai-pref-dir-watch-blanks board 1))
   ([board threshold] (ai-pref-dir-watch-blanks board threshold [:l :l :d :d :u [:u :l :d] :r [:r :l :d]]))
   ([board threshold priorities]
      (let [priorities (partition 2 priorities)]
