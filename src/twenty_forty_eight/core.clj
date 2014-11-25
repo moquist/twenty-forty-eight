@@ -243,13 +243,10 @@
   ([ai-fn] (play-ai->stats ai-fn 1000))
   ([ai-fn n] (play-ai->stats ai-fn n []))
   ([ai-fn n losing-boards]
-     (if (> n 0)
-       (recur
-        ai-fn
-        (dec n)
-        (conj losing-boards (future (play-ai ai-fn))))
-       (stats-summary (map #(-> % deref max-cell)
-                           losing-boards)))))
+     (stats-summary
+      (map (comp max-cell deref)
+           (for [_ (range n)]
+             (future (play-ai ai-fn)))))))
 
 (comment
   "How to play:"
