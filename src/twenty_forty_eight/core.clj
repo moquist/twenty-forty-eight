@@ -203,14 +203,20 @@
   If the threshold of blanks has been crossed, skip the first two
   prioritized directions and take the 3rd."
   ([board] (ai-pref-dir-watch-blanks board 1))
-  ([board threshold] (ai-pref-dir-watch-blanks board threshold [:l :l :d :d :u [:u :l :d] :r [:r :l :d]]))
+  ([board threshold]
+     (ai-pref-dir-watch-blanks
+      board
+      threshold
+      (array-map :l :l
+                 :d :d
+                 :u [:u :l :d]    ; we always want to move :l and :d immediately after :u
+                 :r [:r :l :d]))) ; we always want to move :l and :d immediately after :r
   ([board threshold priorities]
-     (let [priorities (partition 2 priorities)]
-       (some (fn ai-pref-dir-watch-blanks- [[dir nexts]]
-               (when (not= board (slam board dir)) nexts))
-             (if (<= (count-blanks board) threshold)
-               (drop 2 priorities) ; fix this if priorities become pairs!
-               priorities)))))
+     (some (fn ai-pref-dir-watch-blanks- [[dir nexts]]
+             (when (not= board (slam board dir)) nexts))
+           (if (<= (count-blanks board) threshold)
+             (drop 2 priorities) ; fix this if priorities become pairs!
+             priorities))))
 
 (defn play-ai
   "Play any AI that is provided as a fn taking a board and returning a
