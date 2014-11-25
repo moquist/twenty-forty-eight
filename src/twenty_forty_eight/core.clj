@@ -241,10 +241,7 @@
   "Play the provided player n times and show stats (min, max, median,
   mean, sd) of max-cell scores."
   ([ai-fn] (play-ai->stats ai-fn 1000))
-  ([ai-fn n] (play-ai->stats
-              ai-fn
-              (dec n)
-              (conj [] (future (play-ai ai-fn)))))
+  ([ai-fn n] (play-ai->stats ai-fn n []))
   ([ai-fn n losing-boards]
      (if (> n 0)
        (recur
