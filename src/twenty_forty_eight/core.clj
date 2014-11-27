@@ -216,7 +216,7 @@
      (ai-pref-dir-watch-blanks
       board
       threshold
-      (array-map :l :l
+      (array-map :l [:l :d]       ; :l :d is our normal base pattern
                  :d :d
                  :u [:u :l :d]    ; we always want to move :l and :d immediately after :u
                  :r [:r :l :d]))) ; we always want to move :l and :d immediately after :r
