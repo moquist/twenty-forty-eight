@@ -233,6 +233,8 @@
   separated by whitespace."
   [board]
   (print-board board)
+  (println "Enter one or more movement directions (l, r, d, u) separated by spaces, and then press \"enter\".
+Enter q to quit.")
   (let [d (map keyword (str/split (read-line) #"\s"))]
     (when (not (some #{:q} d))
       d)))
