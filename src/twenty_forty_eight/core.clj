@@ -128,7 +128,8 @@
       (assoc m :moves (conj (or (:moves m) []) dir)))))
 
 (defn slammable?
-  "If movement in any direction changes the board, returns true. Else false."
+  "If movement on either axis changes the board, returns true. Else
+  false."
   [board]
   (some (fn slammable?- [dir]
           (not= board (slam board dir)))
