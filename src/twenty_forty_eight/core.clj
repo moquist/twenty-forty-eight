@@ -167,7 +167,9 @@
           new-board (detect-loss board new-board)]
       (if (:loss? (meta new-board)) 
         new-board
-        (randomize new-board)))))
+        (if (= board new-board)
+          board
+          (randomize new-board))))))
 
 (defn moves
   "Move according to a given seq of moves until we run out of moves,
