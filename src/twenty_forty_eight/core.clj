@@ -2,6 +2,7 @@
   twenty-forty-eight.core
   (:require [clojure.pprint :refer [pprint]]
             [clojure.repl :as repl]
+            [clojure.string :as str]
             [clojure.math.numeric-tower :as math]
             [incanter.stats :as stats]))
 
@@ -226,6 +227,15 @@
            (if (<= (count-blanks board) threshold)
              (drop 2 priorities)
              priorities))))
+
+(defn human-intelligence
+  "Print the board, ask for one or more directions (l, r, d, u)
+  separated by whitespace."
+  [board]
+  (print-board board)
+  (let [d (map keyword (str/split (read-line) #"\s"))]
+    (when (not (some #{:q} d))
+      d)))
 
 (defn play-ai
   "Play any AI that is provided as a fn taking a board and returning a
