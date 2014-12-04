@@ -129,12 +129,13 @@
       (assoc m :moves (conj (or (:moves m) []) dir)))))
 
 (defn slammable?
-  "If movement on either axis changes the board, returns true. Else
+  "If movement in any direction changes the board, returns true. Else
   false."
   [board]
-  (some (fn slammable?- [dir]
-          (not= board (slam board dir)))
-        [:l :d]))
+  (or (not (full? board))
+      (some (fn slammable?- [dir]
+              (not= board (slam board dir)))
+            [:l :d])))
 
 (defn detect-loss
   "If no move just happened, the board is full, and no movement is
