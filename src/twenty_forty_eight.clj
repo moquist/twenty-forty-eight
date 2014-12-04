@@ -1,5 +1,5 @@
 (ns ^{:todo "Refactor for beauty"}
-  twenty-forty-eight.core
+  twenty-forty-eight
   (:require [clojure.pprint :refer [pprint]]
             [clojure.repl :as repl]
             [clojure.string :as str]
