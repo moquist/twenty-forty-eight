@@ -184,19 +184,23 @@
 
 (defn a-not-i
   "This is a null model for validating any AIs."
-  [board]
-  (some (fn a-not-i- [dir]
-          (when (not= board (slam board dir)) dir))
-        (shuffle [:l :r :u :d])))
+  []
+  (fn a-not-i* [board]
+    (some (fn a-not-i- [dir]
+            (when (not= board (slam board dir)) dir))
+          (shuffle [:l :r :u :d]))))
+
 
 (defn ai-pref-dir
   "This is a simple heuristic AI.
   If you can move in a prioritized direction, do so."
-  ([board] (ai-pref-dir board [:l :d :u :r]))
-  ([board priorities]
-     (some (fn ai-pref-dir- [dir]
-             (when (not= board (slam board dir)) dir))
-           priorities)))
+  []
+  (fn ai-pref-dir*
+    ([board] (ai-pref-dir* board [:l :d :u :r]))
+    ([board priorities]
+       (some (fn ai-pref-dir- [dir]
+               (when (not= board (slam board dir)) dir))
+             priorities))))
 
 (defn count-blanks [board]
   (or (get
@@ -213,32 +217,37 @@
 
   If the threshold of blanks has been crossed, skip the first two
   prioritized directions and take the 3rd."
-  ([board] (ai-pref-dir-watch-blanks board 1))
-  ([board threshold]
-     (ai-pref-dir-watch-blanks
-      board
-      threshold
-      (array-map :l [:l :d]       ; :l :d is our normal base pattern
-                 :d :d
-                 :u [:u :l :d]    ; we always want to move :l and :d immediately after :u
-                 :r [:r :l :d]))) ; we always want to move :l and :d immediately after :r
-  ([board threshold priorities]
-     (some (fn ai-pref-dir-watch-blanks- [[dir nexts]]
-             (when (not= board (slam board dir)) nexts))
-           (if (<= (count-blanks board) threshold)
-             (drop 2 priorities)
-             priorities))))
+  []
+  (fn ai-pref-dir-watch-blanks*
+    ([board] (ai-pref-dir-watch-blanks* board 1))
+    ([board threshold]
+       (ai-pref-dir-watch-blanks*
+        board
+        threshold
+        (array-map :l [:l :d]       ; :l :d is our normal base pattern
+                   :d :d
+                   :u [:u :l :d]    ; we always want to move :l and :d immediately after :u
+                   :r [:r :l :d]))) ; we always want to move :l and :d immediately after :r
+    ([board threshold priorities]
+       (some (fn ai-pref-dir-watch-blanks- [[dir nexts]]
+               (when (not= board (slam board dir)) nexts))
+             (if (<= (count-blanks board) threshold)
+               (drop 2 priorities)
+               priorities)))))
+
 
 (defn human-intelligence
   "Print the board, ask for one or more directions (l, r, d, u)
   separated by whitespace."
-  [board]
-  (print-board board)
-  (println "Enter one or more movement directions (l, r, d, u) separated by spaces, and then press \"enter\".
+  []
+  (fn human-intelligence*
+    [board]
+    (print-board board)
+    (println "Enter one or more movement directions (l, r, d, u) separated by spaces, and then press \"enter\".
 Enter q to quit.")
-  (let [d (map keyword (str/split (read-line) #"\s"))]
-    (when (not (some #{:q} d))
-      d)))
+    (let [d (map keyword (str/split (read-line) #"\s"))]
+      (when (not (some #{:q} d))
+        d))))
 
 (defn play-ai
   "Play any AI that is provided as a fn taking a board and returning a
@@ -274,7 +283,7 @@ Enter q to quit.")
      (stats-summary
       (map (comp max-cell deref)
            (for [_ (range n)]
-             (future (play-ai ai-fn)))))))
+             (future (play-ai (ai-fn))))))))
 
 (comment
   "How to play:"
