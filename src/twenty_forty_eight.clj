@@ -190,6 +190,16 @@
             (when (not= board (slam board dir)) dir))
           (shuffle [:l :r :u :d]))))
 
+(defn a-stubbornness
+  "This is a foolishly stubborn player that just keeps doing the same sequence repeatedly.
+  It was expected to be worse than a-not-i (the null model), and it is."
+  []
+  (let [the-plan (atom (cycle [:u :u :d :d :l :r :l :r]))]
+    (fn a-stubbornness* [board]
+      (when (-> board meta :loss? not)
+          (let [x (first @the-plan)]
+            (swap! the-plan rest)
+            x)))))
 
 (defn ai-pref-dir
   "This is a simple heuristic AI.
